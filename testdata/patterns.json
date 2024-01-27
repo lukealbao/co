@@ -80,6 +80,7 @@
          "foo/bar": false,
          "foo/bart": false,
          "foo/bar/baz": true,
+         "foo/bar/baz/qux": true,
          "baz/foo/bar": false,
          "baz/foo/bar/qux": false
       }

@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	commentRegexp  = regexp.MustCompile(`\A\s*#`)
 	emailRegexp    = regexp.MustCompile(`\A[A-Z0-9a-z\._%\+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,6}\z`)
 	teamRegexp     = regexp.MustCompile(`\A@([a-zA-Z0-9\-]+\/[a-zA-Z0-9_\-]+)\z`)
 	usernameRegexp = regexp.MustCompile(`\A@([a-zA-Z0-9\-]+)\z`)
@@ -21,40 +22,41 @@ const (
 )
 
 // ParseFile parses a CODEOWNERS file, returning a set of rules.
-func ParseFile(f io.Reader) (Ruleset, error) {
-	rules := Ruleset{}
+func ParseFile(f io.Reader) ([]Rule, error) {
+	rules := make([]Rule, 0)
 	scanner := bufio.NewScanner(f)
-	lineNo := 0
-	for scanner.Scan() {
-		lineNo++
+
+	r := newRule()
+
+	for lineNo := 1; scanner.Scan(); lineNo++ {
 		line := scanner.Text()
 
-		// Ignore blank lines and comments
-		if len(line) == 0 || line[0] == '#' {
+		if line == "" || commentRegexp.MatchString(line) {
+			r.leadingComment += line + "\n"
 			continue
 		}
 
-		rule, err := parseRule(line)
-		if err != nil {
-			return nil, fmt.Errorf("line %d: %w", lineNo, err)
+		if err := parseRule(line, r); err != nil {
+			return rules, fmt.Errorf("line %d: %v", lineNo, err)
+		} else {
+			r.SourceLine = lineNo
+			rules = append(rules, *r)
+			r = newRule()
 		}
-		rule.LineNumber = lineNo
-		rules = append(rules, rule)
 	}
+
 	return rules, nil
 }
 
-// parseRule parses a single line of a CODEOWNERS file, returning a Rule struct
-func parseRule(ruleStr string) (Rule, error) {
-	r := Rule{}
-
+func parseRule(ruleStr string, r *Rule) error {
 	state := statePattern
 	escaped := false
+
 	buf := bytes.Buffer{}
 	for i, ch := range strings.TrimSpace(ruleStr) {
 		// Comments consume the rest of the line and stop further parsing
 		if ch == '#' {
-			r.Comment = strings.TrimSpace(ruleStr[i+1:])
+			r.trailingComment = strings.TrimSpace(ruleStr[i:])
 			break
 		}
 
@@ -72,7 +74,7 @@ func parseRule(ruleStr string) (Rule, error) {
 				// Unescaped whitespace means this is the end of the pattern
 				pattern, err := newPattern(buf.String())
 				if err != nil {
-					return r, err
+					return err
 				}
 				r.pattern = pattern
 				buf.Reset()
@@ -83,7 +85,7 @@ func parseRule(ruleStr string) (Rule, error) {
 				buf.WriteRune(ch)
 
 			default:
-				return r, fmt.Errorf("unexpected character '%c' at position %d", ch, i+1)
+				return fmt.Errorf("unexpected character '%c' at position %d", ch, i+1)
 			}
 			// Escaping only applies to one character
 			escaped = false
@@ -97,9 +99,9 @@ func parseRule(ruleStr string) (Rule, error) {
 					ownerStr := buf.String()
 					owner, err := newOwner(ownerStr)
 					if err != nil {
-						return r, fmt.Errorf("%s at position %d", err.Error(), i+1-len(ownerStr))
+						return fmt.Errorf("%s at position %d", err.Error(), i+1-len(ownerStr))
 					}
-					r.Owners = append(r.Owners, owner)
+					r.Owners = append(r.Owners, owner.String())
 					buf.Reset()
 				}
 
@@ -108,7 +110,7 @@ func parseRule(ruleStr string) (Rule, error) {
 				buf.WriteRune(ch)
 
 			default:
-				return r, fmt.Errorf("unexpected character '%c' at position %d", ch, i+1)
+				return fmt.Errorf("unexpected character '%c' at position %d", ch, i+1)
 			}
 		}
 	}
@@ -118,12 +120,12 @@ func parseRule(ruleStr string) (Rule, error) {
 	switch state {
 	case statePattern:
 		if buf.Len() == 0 { // We should have non-empty pattern
-			return r, fmt.Errorf("unexpected end of rule")
+			return fmt.Errorf("unexpected end of rule")
 		}
 
 		pattern, err := newPattern(buf.String())
 		if err != nil {
-			return r, err
+			return err
 		}
 		r.pattern = pattern
 
@@ -133,13 +135,13 @@ func parseRule(ruleStr string) (Rule, error) {
 			ownerStr := buf.String()
 			owner, err := newOwner(ownerStr)
 			if err != nil {
-				return r, fmt.Errorf("%s at position %d", err.Error(), len(ruleStr)+1-len(ownerStr))
+				return fmt.Errorf("%s at position %d", err.Error(), len(ruleStr)+1-len(ownerStr))
 			}
-			r.Owners = append(r.Owners, owner)
+			r.Owners = append(r.Owners, owner.String())
 		}
 	}
 
-	return r, nil
+	return nil
 }
 
 // newOwner figures out which kind of owner this is and returns an Owner struct

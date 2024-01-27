@@ -1,34 +1,8 @@
-// Package codeowners is a library for working with CODEOWNERS files.
-//
-// CODEOWNERS files map gitignore-style path patterns to sets of owners, which
-// may be GitHub users, GitHub teams, or email addresses. This library parses
-// the CODEOWNERS file format into rulesets, which may then be used to determine
-// the ownership of files.
-//
-// Usage
-//
-// To find the owner of a given file, parse a CODEOWNERS file and call Match()
-// on the resulting ruleset.
-//  ruleset, err := codeowners.ParseFile(file)
-//  if err != nil {
-//  	log.Fatal(err)
-//  }
-//
-//  rule, err := ruleset.Match("path/to/file")
-//  if err != nil {
-//  	log.Fatal(err)
-//  }
-//
-// Command line interface
-//
-// A command line interface is also available in the cmd/codeowners package.
-// When run, it will walk the directory tree showing the code owners for each
-// file encountered. The help flag lists available options.
-//
-//  $ codeowners --help
+// Package codeowners needs documentation.
 package codeowners
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -39,7 +13,7 @@ import (
 // LoadFileFromStandardLocation loads and parses a CODEOWNERS file at one of the
 // standard locations for CODEOWNERS files (./, .github/, docs/). If run from a
 // git repository, all paths are relative to the repository root.
-func LoadFileFromStandardLocation() (Ruleset, error) {
+func LoadFileFromStandardLocation() ([]Rule, error) {
 	path := findFileAtStandardLocation()
 	if path == "" {
 		return nil, fmt.Errorf("could not find CODEOWNERS file at any of the standard locations")
@@ -48,12 +22,67 @@ func LoadFileFromStandardLocation() (Ruleset, error) {
 }
 
 // LoadFile loads and parses a CODEOWNERS file at the path specified.
-func LoadFile(path string) (Ruleset, error) {
+func LoadFile(path string) ([]Rule, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	return ParseFile(f)
+}
+
+func LsFiles(ref string) ([]string, error) {
+	var (
+		files []byte
+		err   error
+	)
+	if ref == "" {
+		files, err = exec.Command("git", "ls-files").Output()
+	} else {
+		files, err = exec.Command("git", "ls-tree", "-r", "--name-only", ref).Output()
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Split(strings.TrimSpace(string(files)), "\n"), nil
+}
+
+func LoadFileFromStandardLocationAtRef(ref string) ([]Rule, error) {
+	if ref == "" {
+		return LoadFileFromStandardLocation()
+	}
+
+	files, err := LsFiles(ref)
+	if err != nil {
+		return nil, err
+	}
+
+	standards := []string{"CODEOWNERS", ".github/CODEOWNERS", ".gitlab/CODEOWNERS", "docs/CODEOWNERS"}
+
+	for _, file := range files {
+		for _, known := range standards {
+			if file == known {
+				return LoadFileAtRef(ref, file)
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("could not find CODEOWNERS file at any of the standard locations (ref: %s)", ref)
+}
+
+// LoadFileAtRef loads and parses a CODEOWNERS file from a historical commit. If ref is an empty string,
+// file will be read from disk.
+func LoadFileAtRef(ref, path string) ([]Rule, error) {
+	if ref == "" {
+		return LoadFile(path)
+	}
+
+	spec := fmt.Sprintf("%s:%s", ref, path)
+	f, err := exec.Command("git", "show", spec).Output()
+	if err != nil {
+		return nil, fmt.Errorf("%s: could not load codeowners at %s", err, spec)
+	}
+	return ParseFile(bytes.NewReader(f))
 }
 
 // findFileAtStandardLocation loops through the standard locations for
@@ -94,42 +123,6 @@ func findRepositoryRoot() (string, bool) {
 		return "", false
 	}
 	return strings.TrimSpace(string(output)), true
-}
-
-// Ruleset is a collection of CODEOWNERS rules.
-type Ruleset []Rule
-
-// Match finds the last rule in the ruleset that matches the path provided. When
-// determining the ownership of a file using CODEOWNERS, order matters, and the
-// last matching rule takes precedence.
-func (r Ruleset) Match(path string) (*Rule, error) {
-	for i := len(r) - 1; i >= 0; i-- {
-		rule := &r[i]
-		match, err := rule.Match(path)
-		if match || err != nil {
-			return rule, err
-		}
-	}
-	return nil, nil
-}
-
-// Rule is a CODEOWNERS rule that maps a gitignore-style path pattern to a set
-// of owners.
-type Rule struct {
-	Owners     []Owner
-	Comment    string
-	LineNumber int
-	pattern    pattern
-}
-
-// RawPattern returns the rule's gitignore-style path pattern.
-func (r Rule) RawPattern() string {
-	return r.pattern.pattern
-}
-
-// Match tests whether the provided matches the rule's pattern.
-func (r Rule) Match(path string) (bool, error) {
-	return r.pattern.match(path)
 }
 
 const (
