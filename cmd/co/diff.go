@@ -157,7 +157,7 @@ Flags:
 				fmt.Fprintf(cmd.ErrOrStderr(), "%s", err)
 				os.Exit(1)
 			} else if follow {
-				result.path = refs.latestName(result.path)
+				result.Path = refs.latestName(result.Path)
 			}
 		}
 
@@ -165,7 +165,7 @@ Flags:
 		sort.Sort(oowners1)
 
 		for _, result := range oowners1 {
-			fmt.Fprintf(tmp1, "%-70s %s\n", result.path, result.owners)
+			fmt.Fprintf(tmp1, "%-70s %s\n", result.Path, result.Owners)
 		}
 
 		rev2, _ := exec.Command("git", "rev-parse", diffRefTo).Output()
@@ -180,7 +180,7 @@ Flags:
 			os.Exit(1)
 		}
 		for _, result := range owners2 {
-			fmt.Fprintf(tmp2, "%-70s %s\n", result.path, result.owners)
+			fmt.Fprintf(tmp2, "%-70s %s\n", result.Path, result.Owners)
 		}
 
 		diff := exec.Command("git", "diff", "-u", "-w", "--no-index", tmp1.Name(), tmp2.Name())
@@ -301,14 +301,14 @@ func findRenames(path, base, current string) (follower, error) {
 }
 
 type r struct {
-	path   string
-	owners []string
+	Path   string   `json:"path"`
+	Owners []string `json:"owners"`
 }
 
 type rs []*r
 
 func (x rs) Len() int           { return len(x) }
-func (x rs) Less(a, b int) bool { return x[a].path < x[b].path }
+func (x rs) Less(a, b int) bool { return x[a].Path < x[b].Path }
 func (x rs) Swap(a, b int) {
 	x[a], x[b] = x[b], x[a]
 }
@@ -327,7 +327,7 @@ func listOwners(rules codeowners.Ruleset, files []string, ownerFilter []string, 
 
 		if rule == nil || rule.Owners == nil || len(rule.Owners) == 0 {
 			if len(ownerFilters) == 0 || showUnowned {
-				out = append(out, &r{path: file, owners: []string{"(unowned)"}})
+				out = append(out, &r{Path: file, Owners: []string{"(unowned)"}})
 			}
 
 			continue
@@ -347,7 +347,7 @@ func listOwners(rules codeowners.Ruleset, files []string, ownerFilter []string, 
 		}
 
 		if len(owners) > 0 {
-			out = append(out, &r{path: file, owners: owners})
+			out = append(out, &r{Path: file, Owners: owners})
 		}
 	}
 

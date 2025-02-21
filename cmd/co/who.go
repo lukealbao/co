@@ -34,7 +34,7 @@ var whoCmd = &cobra.Command{
 		exitIf(err)
 
 		for _, result := range files {
-			fmt.Fprintf(cmd.OutOrStdout(), "%-70s %s\n", result.path, result.owners)
+			fmt.Fprintf(cmd.OutOrStdout(), "%-70s %s\n", result.Path, result.Owners)
 		}
 	},
 }
