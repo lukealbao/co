@@ -44,6 +44,7 @@ func init() {
 	root.PersistentFlags().StringVarP(&codeownersPath, "file", "f", "", "CODEOWNERS file path")
 	whoCmd.Flags().StringSliceVarP(&ownerFilters, "owner", "o", nil, "filter results by owner")
 	whoCmd.Flags().BoolVarP(&showUnowned, "unowned", "u", false, "only show unowned files (can be combined with -o)")
+	whoCmd.Flags().BoolP("json", "j", false, "format output as json. output is Array<{path: string; owners: Array<string>}>.")
 
 	root.AddCommand(whoCmd)
 	root.AddCommand(whyCmd)
