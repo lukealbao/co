@@ -316,7 +316,7 @@ func (x rs) Swap(a, b int) {
 var _ sort.Interface = (rs)(nil)
 
 // listOwners returns a list of structured output. Callers must format for printing.
-func listOwners(rules codeowners.Ruleset, files []string, ownerFilter []string, showUnowned bool) ([]*r, error) {
+func listOwners(rules codeowners.Ruleset, files []string, ownerFilters []string, showUnowned bool) ([]*r, error) {
 	var out []*r = make([]*r, 0)
 
 	for _, file := range files {
