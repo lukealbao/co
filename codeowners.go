@@ -14,7 +14,7 @@ import (
 // standard locations for CODEOWNERS files (./, .github/, docs/). If run from a
 // git repository, all paths are relative to the repository root.
 func LoadFileFromStandardLocation() ([]Rule, error) {
-	path := findFileAtStandardLocation()
+	path := FindFileAtStandardLocation()
 	if path == "" {
 		return nil, fmt.Errorf("could not find CODEOWNERS file at any of the standard locations")
 	}
@@ -85,11 +85,11 @@ func LoadFileAtRef(ref, path string) ([]Rule, error) {
 	return ParseFile(bytes.NewReader(f))
 }
 
-// findFileAtStandardLocation loops through the standard locations for
+// FindFileAtStandardLocation loops through the standard locations for
 // CODEOWNERS files (./, .github/, docs/), and returns the first place a
 // CODEOWNERS file is found. If run from a git repository, all paths are
 // relative to the repository root.
-func findFileAtStandardLocation() string {
+func FindFileAtStandardLocation() string {
 	pathPrefix := ""
 	repoRoot, inRepo := findRepositoryRoot()
 	if inRepo {

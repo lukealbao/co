@@ -20,6 +20,7 @@ var root = &cobra.Command{
 
 		if path == "" {
 			sessionRules, err = codeowners.LoadFileFromStandardLocationAtRef("")
+			codeownersPath = codeowners.FindFileAtStandardLocation()
 		} else {
 			sessionRules, err = codeowners.LoadFileAtRef("", path)
 		}
@@ -54,14 +55,10 @@ func init() {
 	diffCmd.Flags().BoolP("renames", "r", false, "follow file renames")
 	root.AddCommand(diffCmd)
 
-	fmtCmd.Flags().StringP("file", "f", "", "path to CODEOWNERS file (required)")
 	fmtCmd.Flags().BoolP("trim", "t", false, "rollup rules into matching parent globs, if any exist")
-	fmtCmd.MarkFlagRequired("file")
 	root.AddCommand(fmtCmd)
 
-	lintCmd.Flags().StringP("file", "f", "", "path to CODEOWNERS file (required)")
 	lintCmd.Flags().Bool("fix", false, "edit CODEOWNERS file to remove unused rules")
-	lintCmd.MarkFlagRequired("file")
 	root.AddCommand(lintCmd)
 
 	root.AddCommand(versionCmd)

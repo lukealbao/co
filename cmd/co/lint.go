@@ -61,13 +61,7 @@ var lintCmd = &cobra.Command{
 			}
 		}
 
-		filepath, err := cmd.Flags().GetString("file")
-		if err != nil {
-			fmt.Fprintln(cmd.ErrOrStderr(), err)
-			os.Exit(1)
-		}
-
-		file, err := os.OpenFile(filepath, os.O_TRUNC|os.O_WRONLY, os.ModePerm)
+		file, err := os.OpenFile(codeownersPath, os.O_TRUNC|os.O_WRONLY, os.ModePerm)
 		if err != nil {
 			fmt.Fprintln(cmd.ErrOrStderr(), err)
 			os.Exit(1)
