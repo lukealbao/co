@@ -46,6 +46,7 @@ func init() {
 	whoCmd.Flags().StringSliceVarP(&ownerFilters, "owner", "o", nil, "filter results by owner")
 	whoCmd.Flags().BoolVarP(&showUnowned, "unowned", "u", false, "only show unowned files (can be combined with -o)")
 	whoCmd.Flags().BoolP("json", "j", false, "format output as json. output is Array<{path: string; owners: Array<string>}>.")
+	whoCmd.Flags().BoolP("stats", "s", false, "display ownership statistics")
 
 	whyCmd.Flags().BoolP("json", "j", false, "format output as json. output is {path: string; line: string; rule: string; owners: Array<string>}.")
 
