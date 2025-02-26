@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 
 	"github.com/lukealbao/co"
 	"github.com/spf13/cobra"
@@ -57,13 +56,6 @@ JSON-formatted output displays an array of objects. Unowned files have a null ow
 		files, err := listOwners(sessionRules, filesToCheck, ownerFilters, showUnowned)
 		exitIf(err)
 
-		displayStats, err := cmd.Flags().GetBool("stats")
-		exitIf(err)
-		if displayStats {
-			displayOwnershipStats(files)
-			return
-		}
-
 		formatJson, err := cmd.Flags().GetBool("json")
 		exitIf(err)
 
@@ -79,46 +71,6 @@ JSON-formatted output displays an array of objects. Unowned files have a null ow
 			fmt.Fprintf(cmd.OutOrStdout(), "%-70s %s\n", result.Path, result.Owners)
 		}
 	},
-}
-
-func displayOwnershipStats(files []*r) {
-	stats := make(map[string]int)
-	for _, file := range files {
-		for _, owner := range file.Owners {
-			stats[owner]++
-		}
-	}
-
-	fileCount := float64(len(files))
-	unownedCount := float64(stats["(unowned)"])
-	ownedCount := float64(fileCount - unownedCount)
-
-	fmt.Printf("Total files: %.0f (%.2f%%)\n", fileCount, (fileCount/fileCount)*100)
-	fmt.Printf("Total files with owners: %.0f (%.2f%%)\n", ownedCount, (ownedCount/fileCount)*100)
-	fmt.Printf("Total unowned files: %.0f (%.2f%%)\n", unownedCount, (unownedCount/fileCount)*100)
-	fmt.Printf("Total owners: %d\n", len(stats)-1)
-
-	fmt.Println()
-
-	// sort owners by count
-	type FilesPerOwner struct {
-		Owner string
-		Count int
-	}
-
-	var ss []FilesPerOwner
-	for Owner, Count := range stats {
-		ss = append(ss, FilesPerOwner{Owner, Count})
-	}
-
-	sort.Slice(ss, func(i, j int) bool {
-		return ss[i].Count > ss[j].Count
-	})
-
-	for _, kv := range ss {
-		percentage := (float64(kv.Count) / fileCount) * 100
-		fmt.Printf("%s: %d (%.2f%%)\n", kv.Owner, kv.Count, percentage)
-	}
 }
 
 func expandAllFiles(paths []string) []string {
