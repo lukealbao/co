@@ -27,9 +27,10 @@ Available Commands:
   fmt         Normalize CODEOWNERS format
   help        Help about any command
   lint        Validate codeowners file
+  stats       Display code ownership statistics
   version     Print code version
   who         List code owners for file(s)
-  why         Show rule used for a file
+  why         Identify which rule effects ownership for a single file.
 
 Flags:
   -f, --file string   CODEOWNERS file path
