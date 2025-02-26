@@ -14,7 +14,7 @@ type OwnerStats struct {
 	TotalFiles    int             `json:"totalFiles"`
 	OwnedFiles    int             `json:"ownedFiles"`
 	UnownedFiles  int             `json:"unownedFiles"`
-	TotalOwners   int             `json:"totalOwners"`
+	OwnerCount    int             `json:"ownerCount"`
 	FilesPerOwner []FilesPerOwner `json:"filesPerOwner"`
 }
 
@@ -54,6 +54,6 @@ func CalculateOwnershipStats(files Owners) OwnerStats {
 		OwnedFiles:    ownedCount,
 		UnownedFiles:  unownedCount,
 		FilesPerOwner: filesPerOwner,
-		TotalOwners:   totalOwners,
+		OwnerCount:    totalOwners,
 	}
 }

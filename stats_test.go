@@ -19,7 +19,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 				TotalFiles:    0,
 				OwnedFiles:    0,
 				UnownedFiles:  0,
-				TotalOwners:   0,
+				OwnerCount:    0,
 				FilesPerOwner: []FilesPerOwner{},
 			},
 		},
@@ -35,7 +35,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 				TotalFiles:   1,
 				OwnedFiles:   1,
 				UnownedFiles: 0,
-				TotalOwners:  1,
+				OwnerCount:   1,
 				FilesPerOwner: []FilesPerOwner{
 					{
 						Owner:      "@teamA",
@@ -57,7 +57,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 				TotalFiles:   1,
 				OwnedFiles:   0,
 				UnownedFiles: 1,
-				TotalOwners:  0,
+				OwnerCount:   0,
 				FilesPerOwner: []FilesPerOwner{
 					{
 						Owner:      "(unowned)",
@@ -87,7 +87,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 				TotalFiles:   3,
 				OwnedFiles:   2,
 				UnownedFiles: 1,
-				TotalOwners:  2,
+				OwnerCount:   2,
 				FilesPerOwner: []FilesPerOwner{
 					{
 						Owner:      "@teamA",
@@ -116,7 +116,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 			assert.Equal(t, tt.expected.TotalFiles, result.TotalFiles)
 			assert.Equal(t, tt.expected.OwnedFiles, result.OwnedFiles)
 			assert.Equal(t, tt.expected.UnownedFiles, result.UnownedFiles)
-			assert.Equal(t, tt.expected.TotalOwners, result.TotalOwners)
+			assert.Equal(t, tt.expected.OwnerCount, result.OwnerCount)
 
 			// For FilesPerOwner, we need to check each field separately due to floating point comparison
 			assert.Equal(t, len(tt.expected.FilesPerOwner), len(result.FilesPerOwner))

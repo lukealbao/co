@@ -13,14 +13,21 @@ var statsCmd = &cobra.Command{
 	Short: "Display code ownership statistics",
 	Long: `Display code ownership statistics
 
-Total files, owned files, unowned files, and owner count are displayed.
+Default format displays a table:
+
+  Total files                    5 (100.00%)
+  Owned files                    2 (40.00%)
+  Unowned files                  3 (60.00%)
+  Owner count                    2
+  ----------------------------------------------
+  (unowned)                                          3 (60.00%)
+  owner-a                                            2 (40.00%)
+  owner-b                                            1 (20.00%)
+
+Unowned files are displayed as belonging to the dummy "(unowned)" group.
+Ownership percentages may add up to more than 100%, as there can be more than one owner per file.
 
 If filepaths are provided, only files matching the provided paths are considered.
-
-Per owner file count and percentage are also displayed, sorted by file count.
-Unowned files are displayed as belonging to the dummy "(unowned)" group.
-
-Ownership percentages may add up to more than 100%, as there can be more than one owner per file.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
@@ -56,12 +63,12 @@ func displayOwnershipStats(stats codeowners.OwnerStats) {
 	ownedCount := float64(stats.OwnedFiles)
 	unownedCount := float64(stats.UnownedFiles)
 	filesPerOwner := stats.FilesPerOwner
-	totalOwners := stats.TotalOwners
+	totalOwners := stats.OwnerCount
 
 	fmt.Printf("%-30s %.0f (%.2f%%)\n", "Total files", fileCount, (fileCount/fileCount)*100)
-	fmt.Printf("%-30s %.0f (%.2f%%)\n", "Total files with owners", ownedCount, (ownedCount/fileCount)*100)
-	fmt.Printf("%-30s %.0f (%.2f%%)\n", "Total unowned files", unownedCount, (unownedCount/fileCount)*100)
-	fmt.Printf("%-30s %d\n", "Total owners", totalOwners)
+	fmt.Printf("%-30s %.0f (%.2f%%)\n", "Owned files", ownedCount, (ownedCount/fileCount)*100)
+	fmt.Printf("%-30s %.0f (%.2f%%)\n", "Unowned files", unownedCount, (unownedCount/fileCount)*100)
+	fmt.Printf("%-30s %d\n", "Owner count", totalOwners)
 	fmt.Println("----------------------------------------------")
 	for _, kv := range filesPerOwner {
 		fmt.Printf("%-50s %d (%.2f%%)\n", kv.Owner, kv.Count, kv.Percentage)
