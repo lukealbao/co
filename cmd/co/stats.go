@@ -11,7 +11,11 @@ import (
 var statsCmd = &cobra.Command{
 	Use:   "stats [filepath]...",
 	Short: "List code ownership statistics for file(s)",
-	Long: `List code owners for file(s)
+	Long: `List code ownership statistics for file(s)
+
+Total files, owned files, unowned files, and owners are displayed.
+
+Per owner file count and percentage are also displayed, sorted by file count.
 
 Note that unowned files are displayed as belonging to the dummy "(unowned)" group.
 `,
