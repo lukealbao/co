@@ -35,6 +35,10 @@ func CalculateOwnershipStats(files Owners) OwnerStats {
 	}
 
 	sort.Slice(filesPerOwner, func(i, j int) bool {
+		countsEqual := filesPerOwner[i].Count == filesPerOwner[j].Count
+		if countsEqual {
+			return filesPerOwner[i].Owner > filesPerOwner[j].Owner
+		}
 		return filesPerOwner[i].Count > filesPerOwner[j].Count
 	})
 
