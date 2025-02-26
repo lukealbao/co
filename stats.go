@@ -12,7 +12,7 @@ type FilesPerOwner struct {
 
 type OwnerStats struct {
 	TotalFiles    int
-	OwnedFiled    int
+	OwnedFiles    int
 	UnownedFiles  int
 	TotalOwners   int
 	FilesPerOwner []FilesPerOwner
@@ -47,7 +47,7 @@ func CalculateOwnershipStats(files Owners) OwnerStats {
 
 	return OwnerStats{
 		TotalFiles:    fileCount,
-		OwnedFiled:    ownedCount,
+		OwnedFiles:    ownedCount,
 		UnownedFiles:  unownedCount,
 		FilesPerOwner: filesPerOwner,
 		TotalOwners:   totalOwners,

@@ -17,7 +17,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 			files: Owners{},
 			expected: OwnerStats{
 				TotalFiles:    0,
-				OwnedFiled:    0,
+				OwnedFiles:    0,
 				UnownedFiles:  0,
 				TotalOwners:   0,
 				FilesPerOwner: []FilesPerOwner{},
@@ -33,7 +33,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 			},
 			expected: OwnerStats{
 				TotalFiles:   1,
-				OwnedFiled:   1,
+				OwnedFiles:   1,
 				UnownedFiles: 0,
 				TotalOwners:  1,
 				FilesPerOwner: []FilesPerOwner{
@@ -55,7 +55,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 			},
 			expected: OwnerStats{
 				TotalFiles:   1,
-				OwnedFiled:   0,
+				OwnedFiles:   0,
 				UnownedFiles: 1,
 				TotalOwners:  0,
 				FilesPerOwner: []FilesPerOwner{
@@ -85,7 +85,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 			},
 			expected: OwnerStats{
 				TotalFiles:   3,
-				OwnedFiled:   2,
+				OwnedFiles:   2,
 				UnownedFiles: 1,
 				TotalOwners:  2,
 				FilesPerOwner: []FilesPerOwner{
@@ -114,7 +114,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 			result := CalculateOwnershipStats(tt.files)
 
 			assert.Equal(t, tt.expected.TotalFiles, result.TotalFiles)
-			assert.Equal(t, tt.expected.OwnedFiled, result.OwnedFiled)
+			assert.Equal(t, tt.expected.OwnedFiles, result.OwnedFiles)
 			assert.Equal(t, tt.expected.UnownedFiles, result.UnownedFiles)
 			assert.Equal(t, tt.expected.TotalOwners, result.TotalOwners)
 

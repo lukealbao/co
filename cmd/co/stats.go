@@ -46,7 +46,7 @@ Note that unowned files are displayed as belonging to the dummy "(unowned)" grou
 
 func displayOwnershipStats(stats codeowners.OwnerStats) {
 	fileCount := float64(stats.TotalFiles)
-	ownedCount := float64(stats.OwnedFiled)
+	ownedCount := float64(stats.OwnedFiles)
 	unownedCount := float64(stats.UnownedFiles)
 	filesPerOwner := stats.FilesPerOwner
 	totalOwners := stats.TotalOwners
