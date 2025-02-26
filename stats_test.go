@@ -124,7 +124,7 @@ func TestCalculateOwnershipStats(t *testing.T) {
 				assert.Equal(t, expectedOwner.Owner, result.FilesPerOwner[i].Owner)
 				assert.Equal(t, expectedOwner.Count, result.FilesPerOwner[i].Count)
 				// Use InDelta for floating point comparison with a small delta
-				assert.InDelta(t, expectedOwner.Percentage, result.FilesPerOwner[i].Percentage, 0.01)
+				assert.InDelta(t, expectedOwner.Percentage, result.FilesPerOwner[i].Percentage, 0.009)
 			}
 		})
 	}
