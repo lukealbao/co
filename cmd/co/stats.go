@@ -16,8 +16,9 @@ var statsCmd = &cobra.Command{
 Total files, owned files, unowned files, and owner count are displayed.
 
 Per owner file count and percentage are also displayed, sorted by file count.
+Unowned files are displayed as belonging to the dummy "(unowned)" group.
 
-Note that unowned files are displayed as belonging to the dummy "(unowned)" group.
+Ownership percentages may add up to more than 100%, as there can be more than one owner per file.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
