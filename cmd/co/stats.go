@@ -13,7 +13,7 @@ var statsCmd = &cobra.Command{
 	Short: "List code ownership statistics for file(s)",
 	Long: `List code ownership statistics for file(s)
 
-Total files, owned files, unowned files, and owners are displayed.
+Total files, owned files, unowned files, and owner count are displayed.
 
 Per owner file count and percentage are also displayed, sorted by file count.
 
