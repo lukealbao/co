@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/lukealbao/co"
+	codeowners "github.com/lukealbao/co"
 	"github.com/spf13/cobra"
 )
 

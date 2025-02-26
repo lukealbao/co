@@ -30,7 +30,7 @@ Note that unowned files are displayed as belonging to the dummy "(unowned)" grou
 		formatJson, err := cmd.Flags().GetBool("json")
 		exitIf(err)
 
-		files, err := listOwners(sessionRules, filesToCheck, ownerFilters, showUnowned)
+		files, err := codeowners.ListOwners(sessionRules, filesToCheck, ownerFilters, showUnowned)
 		exitIf(err)
 
 		stats := calculateOwnershipStats(files)
@@ -59,7 +59,7 @@ type OwnerStats struct {
 	filesPerOwner []FilesPerOwner
 }
 
-func calculateOwnershipStats(files []*r) OwnerStats {
+func calculateOwnershipStats(files codeowners.Owners) OwnerStats {
 	fileCount := len(files)
 
 	stats := make(map[string]int)
