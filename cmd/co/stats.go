@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
 
 	codeowners "github.com/lukealbao/co"
 	"github.com/spf13/cobra"
@@ -33,9 +32,9 @@ Note that unowned files are displayed as belonging to the dummy "(unowned)" grou
 		files, err := codeowners.ListOwners(sessionRules, filesToCheck, ownerFilters, showUnowned)
 		exitIf(err)
 
-		stats := calculateOwnershipStats(files)
+		stats := codeowners.CalculateOwnershipStats(files)
 		if formatJson {
-			bytes, err := json.MarshalIndent(stats.filesPerOwner, "", "  ")
+			bytes, err := json.MarshalIndent(stats.FilesPerOwner, "", "  ")
 			exitIf(err)
 
 			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", bytes)
@@ -45,59 +44,12 @@ Note that unowned files are displayed as belonging to the dummy "(unowned)" grou
 	},
 }
 
-type FilesPerOwner struct {
-	Owner      string  `json:"owner"`
-	Count      int     `json:"fileCount"`
-	Percentage float64 `json:"percentage"`
-}
-
-type OwnerStats struct {
-	totalFiles    int
-	ownedFiled    int
-	unownedFiles  int
-	totalOwners   int
-	filesPerOwner []FilesPerOwner
-}
-
-func calculateOwnershipStats(files codeowners.Owners) OwnerStats {
-	fileCount := len(files)
-
-	stats := make(map[string]int)
-	for _, file := range files {
-		for _, owner := range file.Owners {
-			stats[owner]++
-		}
-	}
-
-	var filesPerOwner []FilesPerOwner
-	for owner, count := range stats {
-		percentage := (float64(count) / float64(fileCount)) * 100
-		filesPerOwner = append(filesPerOwner, FilesPerOwner{owner, count, percentage})
-	}
-
-	sort.Slice(filesPerOwner, func(i, j int) bool {
-		return filesPerOwner[i].Count > filesPerOwner[j].Count
-	})
-
-	unownedCount := stats["(unowned)"]
-	ownedCount := fileCount - unownedCount
-	totalOwners := len(stats) - 1
-
-	return OwnerStats{
-		totalFiles:    fileCount,
-		ownedFiled:    ownedCount,
-		unownedFiles:  unownedCount,
-		filesPerOwner: filesPerOwner,
-		totalOwners:   totalOwners,
-	}
-}
-
-func displayOwnershipStats(stats OwnerStats) {
-	fileCount := float64(stats.totalFiles)
-	ownedCount := float64(stats.ownedFiled)
-	unownedCount := float64(stats.unownedFiles)
-	filesPerOwner := stats.filesPerOwner
-	totalOwners := stats.totalOwners
+func displayOwnershipStats(stats codeowners.OwnerStats) {
+	fileCount := float64(stats.TotalFiles)
+	ownedCount := float64(stats.OwnedFiled)
+	unownedCount := float64(stats.UnownedFiles)
+	filesPerOwner := stats.FilesPerOwner
+	totalOwners := stats.TotalOwners
 
 	fmt.Printf("Total files: %.0f (%.2f%%)\n", fileCount, (fileCount/fileCount)*100)
 	fmt.Printf("Total files with owners: %.0f (%.2f%%)\n", ownedCount, (ownedCount/fileCount)*100)
