@@ -40,7 +40,10 @@ func CalculateOwnershipStats(files Owners) OwnerStats {
 
 	unownedCount := stats["(unowned)"]
 	ownedCount := fileCount - unownedCount
-	totalOwners := len(stats) - 1
+	totalOwners := len(stats)
+	if _, hasUnowned := stats["(unowned)"]; hasUnowned {
+		totalOwners--
+	}
 
 	return OwnerStats{
 		TotalFiles:    fileCount,
