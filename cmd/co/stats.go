@@ -55,12 +55,12 @@ func displayOwnershipStats(stats codeowners.OwnerStats) {
 	filesPerOwner := stats.FilesPerOwner
 	totalOwners := stats.TotalOwners
 
-	fmt.Printf("Total files: %.0f (%.2f%%)\n", fileCount, (fileCount/fileCount)*100)
-	fmt.Printf("Total files with owners: %.0f (%.2f%%)\n", ownedCount, (ownedCount/fileCount)*100)
-	fmt.Printf("Total unowned files: %.0f (%.2f%%)\n", unownedCount, (unownedCount/fileCount)*100)
-	fmt.Printf("Total owners: %d\n", totalOwners)
-	fmt.Println()
+	fmt.Printf("%-30s %.0f (%.2f%%)\n", "Total files", fileCount, (fileCount/fileCount)*100)
+	fmt.Printf("%-30s %.0f (%.2f%%)\n", "Total files with owners", ownedCount, (ownedCount/fileCount)*100)
+	fmt.Printf("%-30s %.0f (%.2f%%)\n", "Total unowned files", unownedCount, (unownedCount/fileCount)*100)
+	fmt.Printf("%-30s %d\n", "Total owners", totalOwners)
+	fmt.Println("----------------------------------------------")
 	for _, kv := range filesPerOwner {
-		fmt.Printf("%s: %d (%.2f%%)\n", kv.Owner, kv.Count, kv.Percentage)
+		fmt.Printf("%-50s %d (%.2f%%)\n", kv.Owner, kv.Count, kv.Percentage)
 	}
 }
