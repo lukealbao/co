@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/lukealbao/co"
+	codeowners "github.com/lukealbao/co"
 	"github.com/spf13/cobra"
 )
 
@@ -53,7 +53,7 @@ JSON-formatted output displays an array of objects. Unowned files have a null ow
 			exitIf(err)
 		}
 
-		files, err := listOwners(sessionRules, filesToCheck, ownerFilters, showUnowned)
+		files, err := codeowners.ListOwners(sessionRules, filesToCheck, ownerFilters, showUnowned)
 		exitIf(err)
 
 		formatJson, err := cmd.Flags().GetBool("json")

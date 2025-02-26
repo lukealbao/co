@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/lukealbao/co"
+	codeowners "github.com/lukealbao/co"
 	"github.com/spf13/cobra"
 )
 
@@ -120,13 +120,13 @@ Flags:
 			os.Exit(1)
 		}
 
-		owners1, err := listOwners(diffRulesFrom, trackedFilesFrom, nil, false)
+		owners1, err := codeowners.ListOwners(diffRulesFrom, trackedFilesFrom, nil, false)
 		if err != nil {
 			fmt.Fprintf(cmd.ErrOrStderr(), "%s", err)
 			os.Exit(1)
 		}
 
-		owners2, err := listOwners(diffRulesTo, trackedFilesTo, nil, false)
+		owners2, err := codeowners.ListOwners(diffRulesTo, trackedFilesTo, nil, false)
 		if err != nil {
 			fmt.Fprintf(cmd.ErrOrStderr(), "%s", err)
 			os.Exit(1)
@@ -161,7 +161,7 @@ Flags:
 			}
 		}
 
-		var oowners1 rs = owners1
+		var oowners1 codeowners.Owners = owners1
 		sort.Sort(oowners1)
 
 		for _, result := range oowners1 {
@@ -298,58 +298,4 @@ func findRenames(path, base, current string) (follower, error) {
 	}
 
 	return out, err
-}
-
-type r struct {
-	Path   string   `json:"path"`
-	Owners []string `json:"owners"`
-}
-
-type rs []*r
-
-func (x rs) Len() int           { return len(x) }
-func (x rs) Less(a, b int) bool { return x[a].Path < x[b].Path }
-func (x rs) Swap(a, b int) {
-	x[a], x[b] = x[b], x[a]
-}
-
-var _ sort.Interface = (rs)(nil)
-
-// listOwners returns a list of structured output. Callers must format for printing.
-func listOwners(rules codeowners.Ruleset, files []string, ownerFilters []string, showUnowned bool) ([]*r, error) {
-	var out []*r = make([]*r, 0)
-
-	for _, file := range files {
-		rule, err := rules.Match(file)
-		if err != nil {
-			return nil, err
-		}
-
-		if rule == nil || rule.Owners == nil || len(rule.Owners) == 0 {
-			if len(ownerFilters) == 0 || showUnowned {
-				out = append(out, &r{Path: file, Owners: []string{"(unowned)"}})
-			}
-
-			continue
-		}
-
-		owners := make([]string, 0, len(rule.Owners))
-		for _, owner := range rule.Owners {
-			filterMatch := len(ownerFilters) == 0 && !showUnowned
-			for _, filter := range ownerFilters {
-				if filter == owner { // TODO: This is "Value" in hmarr. Are we losing info?
-					filterMatch = true
-				}
-			}
-			if filterMatch {
-				owners = append(owners, owner)
-			}
-		}
-
-		if len(owners) > 0 {
-			out = append(out, &r{Path: file, Owners: owners})
-		}
-	}
-
-	return out, nil
 }
