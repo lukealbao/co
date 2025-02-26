@@ -34,7 +34,7 @@ Note that unowned files are displayed as belonging to the dummy "(unowned)" grou
 
 		stats := codeowners.CalculateOwnershipStats(files)
 		if formatJson {
-			bytes, err := json.MarshalIndent(stats.FilesPerOwner, "", "  ")
+			bytes, err := json.MarshalIndent(stats, "", "  ")
 			exitIf(err)
 
 			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", bytes)

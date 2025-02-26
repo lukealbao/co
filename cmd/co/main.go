@@ -52,7 +52,7 @@ func init() {
 
 	root.AddCommand(whyCmd)
 
-	statsCmd.Flags().BoolP("json", "j", false, "format output as json. output is Array<{owner: string; fileCount: number, percentage: number}>.")
+	statsCmd.Flags().BoolP("json", "j", false, "format output as json")
 	root.AddCommand(statsCmd)
 
 	diffCmd.Flags().BoolP("renames", "r", false, "follow file renames")
