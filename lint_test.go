@@ -11,6 +11,7 @@ func TestConsolidateSubTree(t *testing.T) {
 		label         string
 		rules         map[string][]string
 		expectedRules map[string][]string
+		fsStat        FsStat
 	}
 
 	tests := []test{
@@ -22,6 +23,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			expectedRules: map[string][]string{
 				"root": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "singleton as dir",
@@ -31,6 +33,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			expectedRules: map[string][]string{
 				"root/": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "singleton as glob",
@@ -40,6 +43,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			expectedRules: map[string][]string{
 				"root/*": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "siblings w/ root as leaf",
@@ -52,6 +56,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			expectedRules: map[string][]string{
 				"root": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "siblings w/ root as dir",
@@ -64,6 +69,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			expectedRules: map[string][]string{
 				"root/": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "siblings w/ root as glob",
@@ -76,6 +82,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			expectedRules: map[string][]string{
 				"root/*": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "deep tree w/ root as leaf",
@@ -88,6 +95,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			expectedRules: map[string][]string{
 				"root": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "deep tree w/ root as dir",
@@ -100,6 +108,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			expectedRules: map[string][]string{
 				"root/": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "deep tree w/ root as glob",
@@ -113,6 +122,7 @@ func TestConsolidateSubTree(t *testing.T) {
 				"root/*":   {"a"},
 				"root/b/c": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			// This is known to be flaky due to map comparison in stretchr.
@@ -129,6 +139,7 @@ func TestConsolidateSubTree(t *testing.T) {
 				"root/b/c": {"a", "b"},
 				"root/d":   {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "don't over-consolidate",
@@ -140,6 +151,7 @@ func TestConsolidateSubTree(t *testing.T) {
 				"root/a": {"a"},
 				"root/b": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "Handle unicode",
@@ -153,6 +165,7 @@ func TestConsolidateSubTree(t *testing.T) {
 				"root/😃":    {"a"},
 				"root/😃😃/*": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "implicit root is honored",
@@ -164,6 +177,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			expectedRules: map[string][]string{
 				"*": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "directory dominates glob",
@@ -174,6 +188,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			expectedRules: map[string][]string{
 				"root/": {"a"},
 			},
+			fsStat: statMock(),
 		},
 		{
 			label: "partial prefix match",
@@ -185,6 +200,20 @@ func TestConsolidateSubTree(t *testing.T) {
 				"root":           {"a"},
 				"root-toot/**/*": {"a"},
 			},
+			fsStat: statMock(),
+		},
+		{
+			label: "shallow root glob doesn't dominate subdirectories",
+			rules: map[string][]string{
+				"root/*":     {"a"},
+				"root/dir/x": {"a"},
+				"root/file":  {"a"}, // shallow glob matches non dirs
+			},
+			expectedRules: map[string][]string{
+				"root/*":     {"a"},
+				"root/dir/x": {"a"},
+			},
+			fsStat: statMock(map[string]bool{"root/dir": true, "root/file": false}),
 		},
 	}
 
@@ -218,7 +247,7 @@ func TestConsolidateSubTree(t *testing.T) {
 			}
 
 			// System under test.
-			ConsolidateTree(tree)
+			ConsolidateTree(tree, test.fsStat)
 
 			// Extract actual changes.
 			{

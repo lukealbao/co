@@ -2,6 +2,7 @@ package codeowners
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/google/btree"
@@ -101,7 +102,17 @@ func NewFileTree(rules []Rule) *FileTree {
 	return &tree
 }
 
-func ConsolidateTree(tree *FileTree) {
+type FsStat func(string) (os.FileInfo, error)
+
+func ConsolidateTree(tree *FileTree, mockableFsStat ...FsStat) {
+	var OsStat FsStat
+
+	if mockableFsStat == nil {
+		OsStat = os.Stat
+	} else {
+		OsStat = mockableFsStat[0]
+	}
+
 	sameSliceContents := func(s1, s2 []string) bool {
 		if len(s1) != len(s2) {
 			return false
@@ -145,6 +156,11 @@ func ConsolidateTree(tree *FileTree) {
 				return true
 			}
 
+			if root == "*" {
+				toRemove = append(toRemove, pat)
+				return true
+			}
+
 			if ok, _ := rule.Match(pat); !ok {
 				return true
 			}
@@ -152,6 +168,18 @@ func ConsolidateTree(tree *FileTree) {
 			if !sameSliceContents(tree.rules[pat].Owners, tree.rules[root].Owners) {
 				toRemove = nil
 				return false
+			}
+
+			info, err := OsStat(pat)
+
+			if err != nil {
+				return true
+			}
+
+			// Consider when root is /path/* and pat is /path/sub. Root matches sub, but when sub
+			// is a directory, it matches deeper files than root does, and thus is not subsumed by root.
+			if root[len(root)-2:] == "/*" && info.IsDir() {
+				return true
 			}
 
 			toRemove = append(toRemove, pat)
