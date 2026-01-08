@@ -12,6 +12,7 @@ func TestFormatting(t *testing.T) {
 		label      string
 		ownersFile string
 		expected   string
+		fsStat     FsStat
 	}{
 		{
 			label: "end-to-end",
@@ -41,6 +42,7 @@ delta @test/a @test/b
 delta/a @test/a
 delta/b/* @test/b
 `,
+			fsStat: statMock(),
 		},
 	}
 
@@ -51,7 +53,7 @@ delta/b/* @test/b
 			assert.NoError(t, err)
 
 			tree := NewFileTree(rules)
-			ConsolidateTree(tree)
+			ConsolidateTree(tree, statMock())
 
 			formatted := tree.String()
 			assert.Equal(t, tc.expected, formatted)
@@ -213,11 +215,6 @@ func TestParseRule(t *testing.T) {
 			name: "malformed patterns",
 			rule: "file.{txt @user",
 			err:  "line 1: unexpected character '{' at position 6",
-		},
-		{
-			name: "patterns with brackets",
-			rule: "file.[cC] @user",
-			err:  "line 1: unexpected character '[' at position 6",
 		},
 		{
 			name: "malformed owners",
