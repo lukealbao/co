@@ -208,6 +208,15 @@ func TestParseRule(t *testing.T) {
 				trailingComment: "",
 			}},
 		},
+		{
+			name: "pattern with parentheses (Next.js route groups)",
+			rule: "src/app/(nonauth)/forgot/**/* @user",
+			expected: []Rule{{
+				SourceLine: 1,
+				pattern:    mustBuildPattern(t, "src/app/(nonauth)/forgot/**/*"),
+				Owners:     []string{"@user"},
+			}},
+		},
 
 		// Error cases
 
